@@ -10,7 +10,7 @@
       </div> 
     <% end -%> 
     <div class="data">
-      <%= link_to_project( project ) %><%= " (" + count_undone_todos_and_notes_phrase(project,"actions") + ")" %>
+      <%= link_to_project( project ) %>
     </div>
     <div class="buttons">
       <span class="grey"><%= project.current_state.to_s.upcase %></span>

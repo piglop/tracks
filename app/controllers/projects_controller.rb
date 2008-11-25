@@ -14,11 +14,11 @@ class ProjectsController < ApplicationController
       projects_and_actions
     else      
       @contexts = current_user.contexts(true)
-      init_not_done_counts(['project'])
+      #init_not_done_counts(['project'])
       if params[:only_active_with_no_next_actions]
         @projects = @projects.select { |p| p.active? && count_undone_todos(p) == 0 }
       end
-      init_project_hidden_todo_counts(['project'])
+      #init_project_hidden_todo_counts(['project'])
       respond_to do |format|
         format.html  &render_projects_html
         format.m     &render_projects_mobile
