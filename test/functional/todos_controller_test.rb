@@ -135,7 +135,7 @@ class TodosControllerTest < Test::Rails::TestCase
     xhr :post, :update, :id => 1, :_source_view => 'todo', "todo"=>{"context_id"=>"1", "project_id"=>"2", "id"=>"1", "notes"=>"", "description"=>"Call Warren Buffet to find out how much he makes per day", "due"=>"30/11/2006"}, "tag_list"=>"foo, bar"
     t = Todo.find(1)
     assert_equal "Call Warren Buffet to find out how much he makes per day", t.description
-    assert_equal "foo, bar", t.tag_list
+    assert_equal "bar, foo", t.tag_list
     expected = Date.new(2006,11,30)
     actual = t.due.to_date
     assert_equal expected, actual, "Expected #{expected.to_s(:db)}, was #{actual.to_s(:db)}"
@@ -163,7 +163,7 @@ class TodosControllerTest < Test::Rails::TestCase
     taglist = "  one  ,  two,three    ,four, 8.1.2, version1.5"
     xhr :post, :update, :id => 1, :_source_view => 'todo', "todo"=>{"context_id"=>"1", "project_id"=>"2", "id"=>"1", "notes"=>"", "description"=>"Call Warren Buffet to find out how much he makes per day", "due"=>"30/11/2006"}, "tag_list"=>taglist
     t = Todo.find(1)
-    assert_equal "one, two, three, four, 8.1.2, version1.5", t.tag_list
+    assert_equal "8.1.2, four, one, three, two, version1.5", t.tag_list
   end
 
   def test_find_tagged_with
@@ -180,11 +180,11 @@ class TodosControllerTest < Test::Rails::TestCase
     login_as(:admin_user)
     get :index, { :format => "rss" }
     assert_equal 'application/rss+xml', @response.content_type
-    # #puts @response.body
+    # puts @response.body
 
     assert_xml_select 'rss[version="2.0"]' do
       assert_select 'channel' do
-        assert_select '>title', 'Tracks Actions'
+        assert_select '>title', 'Actions'
         assert_select '>description', "Actions for #{users(:admin_user).display_name}"
         assert_select 'language', 'en-us'
         assert_select 'ttl', '40'
@@ -193,7 +193,7 @@ class TodosControllerTest < Test::Rails::TestCase
           assert_select 'description', /.*/
           assert_select 'link', %r{http://test.host/contexts/.+}
           assert_select 'guid', %r{http://test.host/todos/.+}
-          assert_select 'pubDate', projects(:timemachine).updated_at.to_s(:rfc822)
+          assert_select 'pubDate', todos(:book).updated_at.to_s(:rfc822)
         end
       end
     end
@@ -205,7 +205,7 @@ class TodosControllerTest < Test::Rails::TestCase
 
     assert_xml_select 'rss[version="2.0"]' do
       assert_select 'channel' do
-        assert_select '>title', 'Tracks Actions'
+        assert_select '>title', 'Actions'
         assert_select '>description', "Actions for #{users(:admin_user).display_name}"
         assert_select 'item', 5 do
           assert_select 'title', /.+/
@@ -240,12 +240,12 @@ class TodosControllerTest < Test::Rails::TestCase
     # #puts @response.body
 
     assert_xml_select 'feed[xmlns="http://www.w3.org/2005/Atom"]' do
-      assert_xml_select '>title', 'Tracks Actions'
+      assert_xml_select '>title', 'Actions'
       assert_xml_select '>subtitle', "Actions for #{users(:admin_user).display_name}"
       assert_xml_select 'entry', 11 do
         assert_xml_select 'title', /.+/
         assert_xml_select 'content[type="html"]', /.*/
-        assert_xml_select 'published', /(#{Regexp.escape(projects(:timemachine).updated_at.xmlschema)}|#{Regexp.escape(projects(:moremoney).updated_at.xmlschema)})/
+        assert_xml_select 'published', /(#{Regexp.escape(todos(:book).updated_at.xmlschema)}|#{Regexp.escape(projects(:moremoney).updated_at.xmlschema)})/
       end
     end
   end
@@ -450,7 +450,7 @@ class TodosControllerTest < Test::Rails::TestCase
 
     # check that the new_todo is in the tickler to show next month
     assert !new_todo.show_from.nil?
-    assert_equal Time.utc(today.year, today.month+1, today.day), new_todo.show_from
+    assert_equal Time.utc(today.year, today.month, today.day)+1.month, new_todo.show_from
   end
   
   def test_check_for_next_todo

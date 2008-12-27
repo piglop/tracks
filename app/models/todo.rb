@@ -4,7 +4,11 @@ class Todo < ActiveRecord::Base
   belongs_to :project
   belongs_to :user
   belongs_to :recurring_todo
-  
+
+  named_scope :active, :conditions => { :state => 'active' }
+  named_scope :not_completed, :conditions =>  ['NOT state = ? ', 'completed']
+  named_scope :are_due, :conditions => ['NOT todos.due IS NULL']
+
   STARRED_TAG_NAME = "starred"
   
   acts_as_state_machine :initial => :active, :column => 'state'
@@ -114,10 +118,10 @@ class Todo < ActiveRecord::Base
   
   def toggle_star!
     if starred?
-      delete_tags STARRED_TAG_NAME
+      _remove_tags STARRED_TAG_NAME
       tags.reload
     else
-      add_tag STARRED_TAG_NAME
+      _add_tags(STARRED_TAG_NAME)
       tags.reload
     end 
     starred?  
@@ -130,7 +134,7 @@ class Todo < ActiveRecord::Base
   # Rich Todo API
   
   def self.from_rich_message(user, default_context_id, description, notes)
-    fields = description.match /([^>@]*)@?([^>]*)>?(.*)/
+    fields = description.match(/([^>@]*)@?([^>]*)>?(.*)/)
     description = fields[1].strip
     context = fields[2].strip
     project = fields[3].strip
