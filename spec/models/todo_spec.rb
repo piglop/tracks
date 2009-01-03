@@ -125,6 +125,16 @@ describe Todo do
         todo.unhide!
         todo.should be_active
       end
+      
+      it "unhides when switched to a unhidden project" do
+        hidden_project = mock_model(Project, :hidden? => true)
+        unhidden_project = mock_model(Project, :hidden? => false)
+        todo = create_todo(:project => hidden_project)
+        todo.hide!
+        todo.should be_project_hidden
+        todo.should_receive(:unhide!).once.with()
+        todo.project = unhidden_project
+      end
     end
 
     it "is deferrable from `active'" do
