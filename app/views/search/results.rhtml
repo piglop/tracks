@@ -33,16 +33,5 @@
       <%= render :partial => "contexts/context_listing", :collection => @found_contexts, :locals => { :suppress_drag_handle => true, :suppress_edit_button => true } %>
     </div>
   <% end -%>
-
-  <% unless @found_tags.empty? -%>
-    <div id="found-tags-container" class="container">
-    <h2><span id="found-tags-count" class="badge"><%= @found_tags.size %></span>Tags matching query</h2>
-    <span class="tags"><%  @found_tags.each do |tag| -%>
-        <span class="tag"><%= link_to tag.name, {:controller => "todos", :action => "tag", :id => tag.name} -%></span>
-      <% end %>
-    </span>
-    <br/>
-    </div>
-  <% end %>
 <% end -%>
 </div>
