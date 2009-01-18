@@ -65,6 +65,7 @@ class TodosController < ApplicationController
       @todo.context_id = context.id
     end
 
+    @todo.update_state_from_project
     @saved = @todo.save
     unless (@saved == false) || p.tag_list.blank?
       @todo.tag_with(p.tag_list)
@@ -231,7 +232,10 @@ class TodosController < ApplicationController
       @todo.activate!
     end
     
-    @saved = @todo.update_attributes params["todo"]
+    @todo.attributes = params["todo"]
+    @todo.update_state_from_project
+    @saved = @todo.save
+    
     @context_changed = @original_item_context_id != @todo.context_id
     @todo_was_activated_from_deferred_state = @original_item_was_deferred && @todo.active?
     
