@@ -85,6 +85,13 @@ class Todo < ActiveRecord::Base
     original_project.nil? ? Project.null_object : original_project
   end
   
+  alias_method :original_project=, :project=
+
+  def project=(project)
+    unhide! if project_hidden? and !project.hidden?
+    self.original_project=(project)
+  end
+  
   alias_method :original_set_initial_state, :set_initial_state
   
   def set_initial_state
