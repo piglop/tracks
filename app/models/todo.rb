@@ -57,6 +57,8 @@ class Todo < ActiveRecord::Base
     end
   end
   
+  before_validation :update_state_from_project
+  
   def update_state_from_project
     if state == 'project_hidden' and !project.hidden?
       self.state = 'active'

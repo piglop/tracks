@@ -65,7 +65,6 @@ class TodosController < ApplicationController
       @todo.context_id = context.id
     end
 
-    @todo.update_state_from_project
     @saved = @todo.save
     unless (@saved == false) || p.tag_list.blank?
       @todo.tag_with(p.tag_list)
@@ -233,7 +232,6 @@ class TodosController < ApplicationController
     end
     
     @todo.attributes = params["todo"]
-    @todo.update_state_from_project
     @saved = @todo.save
     
     @context_changed = @original_item_context_id != @todo.context_id
