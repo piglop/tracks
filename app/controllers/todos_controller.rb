@@ -233,7 +233,7 @@ class TodosController < ApplicationController
     
     @todo.attributes = params["todo"]
     @saved = @todo.save
-    
+
     @context_changed = @original_item_context_id != @todo.context_id
     @todo_was_activated_from_deferred_state = @original_item_was_deferred && @todo.active?
     

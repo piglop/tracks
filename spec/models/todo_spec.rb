@@ -171,7 +171,6 @@ describe Todo do
     end
   end
 
-
   describe 'when toggling completion' do
     it 'toggles to active when completed' do
       todo = create_todo
