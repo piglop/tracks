@@ -151,14 +151,14 @@ describe Todo do
       project = mock_model(Project, :hidden? => false)
       todo = Todo.new(:state => 'project_hidden', :project => project)
       todo.should be_project_hidden
-      todo.update_state_from_project
+      todo.save
       todo.should be_active
     end
 
     it "should unhide when project is null" do
       todo = Todo.new(:state => 'project_hidden', :project => nil)
       todo.should be_project_hidden
-      todo.update_state_from_project
+      todo.save
       todo.should be_active
     end
 
@@ -166,7 +166,7 @@ describe Todo do
       project = mock_model(Project, :hidden? => true)
       todo = Todo.new(:state => 'active', :project => project)
       todo.should be_active
-      todo.update_state_from_project
+      todo.save
       todo.should be_project_hidden
     end
   end
