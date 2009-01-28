@@ -125,16 +125,6 @@ describe Todo do
         todo.unhide!
         todo.should be_active
       end
-      
-      it "unhides when switched to a unhidden project" do
-        hidden_project = mock_model(Project, :hidden? => true)
-        unhidden_project = mock_model(Project, :hidden? => false)
-        todo = create_todo(:project => hidden_project)
-        todo.hide!
-        todo.should be_project_hidden
-        todo.should_receive(:unhide!).once.with()
-        todo.project = unhidden_project
-      end
     end
 
     it "is deferrable from `active'" do
@@ -163,6 +153,31 @@ describe Todo do
     end
   end
 
+  describe 'when update_state_from_project is called' do
+    it "should unhide when project is active" do
+      project = mock_model(Project, :hidden? => false)
+      todo = Todo.new(:state => 'project_hidden', :project => project)
+      todo.should be_project_hidden
+      todo.update_state_from_project
+      todo.should be_active
+    end
+
+    it "should unhide when project is null" do
+      todo = Todo.new(:state => 'project_hidden', :project => nil)
+      todo.should be_project_hidden
+      todo.update_state_from_project
+      todo.should be_active
+    end
+
+    it "should hide when project is hidden" do
+      project = mock_model(Project, :hidden? => true)
+      todo = Todo.new(:state => 'active', :project => project)
+      todo.should be_active
+      todo.update_state_from_project
+      todo.should be_project_hidden
+    end
+  end
+  
   describe 'when retrieving project' do
     it 'returns project if set' do
       project = mock_model(Project)
