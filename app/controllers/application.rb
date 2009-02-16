@@ -20,7 +20,7 @@ class CannotAccessContext < RuntimeError; end
 
 class ApplicationController < ActionController::Base
 
-  protect_from_forgery :secret => SALT
+  protect_from_forgery :secret => SITE_CONFIG['salt']
 
   helper :application
   include LoginSystem
@@ -33,8 +33,6 @@ class ApplicationController < ActionController::Base
   prepend_before_filter :login_required
   prepend_before_filter :enable_mobile_content_negotiation
   after_filter :set_charset
-  
-
 
   include ActionView::Helpers::TextHelper
   include ActionView::Helpers::SanitizeHelper

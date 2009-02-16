@@ -260,6 +260,7 @@ class TodosController < ApplicationController
     @project_changed = @original_item_project_id != @todo.project_id
     if (@project_changed && !@original_item_project_id.nil?) then
       @todo.update_state_from_project
+      @todo.save!
       @remaining_undone_in_project = current_user.projects.find(@original_item_project_id).not_done_todo_count
     end
     determine_down_count
@@ -269,7 +270,7 @@ class TodosController < ApplicationController
       format.m do
         if @saved
           if cookies[:mobile_url]
-            cookies[:mobile_url] = {:value => nil, :secure => TRACKS_COOKIES_SECURE}
+            cookies[:mobile_url] = {:value => nil, :secure => SITE_CONFIG['secure_cookies']}
             redirect_to cookies[:mobile_url]
           else
             redirect_to formatted_todos_path(:m)
@@ -422,7 +423,7 @@ class TodosController < ApplicationController
         @default_project_context_name_map = build_default_project_context_name_map(@projects).to_json
       }
       format.m { 
-        cookies[:mobile_url]= {:value => request.request_uri, :secure => TRACKS_COOKIES_SECURE}
+        cookies[:mobile_url]= {:value => request.request_uri, :secure => SITE_CONFIG['secure_cookies']}
         render :action => "mobile_tag"         
       }
     end
@@ -720,7 +721,7 @@ class TodosController < ApplicationController
     lambda do
       @page_title = "All actions"
       @home = true
-      cookies[:mobile_url]= { :value => request.request_uri, :secure => TRACKS_COOKIES_SECURE}
+      cookies[:mobile_url]= { :value => request.request_uri, :secure => SITE_CONFIG['secure_cookies']}
       determine_down_count
     
       render :action => 'index'
