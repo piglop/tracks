@@ -2,7 +2,7 @@ module TodosHelper
 
   # #require 'users_controller' Counts the number of incomplete items in the
   # specified context
-  # 
+  #
   def count_items(context)
     count = Todo.find_all("done=0 AND context_id=#{context.id}").length
   end
@@ -22,25 +22,6 @@ module TodosHelper
       :prevent_default => true
   end
   
-  def set_behavior_for_delete_icon
-    parameters = "_source_view=#{@source_view}"
-    parameters += "&_tag_name=#{@tag_name}" if @source_view == 'tag'
-    apply_behavior '.item-container a.delete_icon:click', :prevent_default => true do |page|
-      page.confirming "'Are you sure that you want to ' + this.title + '?'" do
-        page << "itemContainer = this.up('.item-container'); itemContainer.startWaiting();"
-        page << remote_to_href(:method => 'delete', :with => "'#{parameters}'", :complete => "itemContainer.stopWaiting();")
-      end    
-    end
-  end
-  
-  def remote_delete_icon
-    str = link_to( image_tag_for_delete,
-      todo_path(@todo), :id => "delete_icon_"+@todo.id.to_s,
-      :class => "icon delete_icon", :title => "delete the action '#{@todo.description}'")
-    set_behavior_for_delete_icon
-    str
-  end
-  
   def set_behavior_for_star_icon
     apply_behavior '.item-container a.star_item:click', 
       remote_to_href(:method => 'put', :with => "{ _source_view : '#{@source_view}' }"),
@@ -54,28 +35,50 @@ module TodosHelper
     set_behavior_for_star_icon
     str
   end
-  
-  def set_behavior_for_edit_icon
-    parameters = "_source_view=#{@source_view}"
-    parameters += "&_tag_name=#{@tag_name}" if @source_view == 'tag'
-    apply_behavior '.item-container a.edit_icon:click', :prevent_default => true do |page|
-      page << "Effect.Pulsate(this);"
-      page << remote_to_href(:method => 'get', :with => "'#{parameters}'")
-    end
+
+  def remote_edit_menu_item(parameters, todo)
+    return link_to_remote(
+      image_tag("edit_off.png", :mouseover => "edit_on.png", :alt => "", :align => "absmiddle")+" Edit",
+      :url => {:controller => 'todos', :action => 'edit', :id => todo.id},
+      :method => 'get',
+      :with => "'#{parameters}'",
+      :before => todo_start_waiting_js(todo),
+      :complete => todo_stop_waiting_js)
   end
-  
-  def remote_edit_icon
-    if !@todo.completed?
-      str = link_to( image_tag_for_edit(@todo),
-        edit_todo_path(@todo),
-        :class => "icon edit_icon")
-      set_behavior_for_edit_icon
-    else
-      str = '<a class="icon">' + image_tag("blank.png") + "</a> "
-    end
-    str
+
+  def remote_delete_menu_item(parameters, todo)
+    return link_to_remote(
+      image_tag("delete_off.png", :mouseover => "delete_on.png", :alt => "", :align => "absmiddle")+" Delete",
+      :url => {:controller => 'todos', :action => 'destroy', :id => todo.id},
+      :method => 'delete',
+      :with => "'#{parameters}'",
+      :before => todo_start_waiting_js(todo),
+      :complete => todo_stop_waiting_js)
   end
-  
+
+  def remote_defer_menu_item(days, todo)
+    return link_to_remote(
+      image_tag("defer_#{days}_off.png", :mouseover => "defer_#{days}.png", :alt => "", :align => "absmiddle")+" Defer #{pluralize(days, "day")}",
+      :url => {:controller => 'todos', :action => 'defer', :id => todo.id, :days => days, :_source_view => (@source_view.underscore.gsub(/\s+/,'_') rescue "")},
+      :before => todo_start_waiting_js(todo),
+      :complete => todo_stop_waiting_js)
+  end
+
+  def todo_start_waiting_js(todo)
+    return "$('ul#{dom_id(todo)}').hide(); itemContainer = $('#{dom_id(todo)}'); itemContainer.startWaiting()"
+  end
+
+  def todo_stop_waiting_js
+    return "itemContainer.stopWaiting();"
+  end
+
+  def image_tag_for_recurring_todo(todo)
+    return link_to(
+      image_tag("recurring16x16.png"),
+      {:controller => "recurring_todos", :action => "index"},
+      :class => "recurring_icon", :title => recurrence_pattern_as_text(todo.recurring_todo))
+  end
+
   def set_behavior_for_toggle_checkbox
     parameters = "_source_view=#{@source_view}"
     parameters += "&_tag_name=#{@tag_name}" if @source_view == 'tag'
@@ -116,7 +119,7 @@ module TodosHelper
     tag_list = tags_except_starred.collect{|t| 
       "<span class=\"tag\">" + 
         link_to(t.name, {:action => "tag", :controller => "todos", :id => t.name+".m"}) + 
-      "</span>"}.join('')
+        "</span>"}.join('')
     if tag_list.empty? then "" else "<span class=\"tags\">#{tag_list}</span>" end
   end
   
@@ -151,7 +154,7 @@ module TodosHelper
   # * l1: created more than 1 x staleness_starts, but < 2 x staleness_starts
   # * l2: created more than 2 x staleness_starts, but < 3 x staleness_starts
   # * l3: created more than 3 x staleness_starts
-  # 
+  #
   def staleness_class(item)
     if item.due || item.completed?
       return ""
@@ -168,7 +171,7 @@ module TodosHelper
 
   # Check show_from date in comparison to today's date Flag up date
   # appropriately with a 'traffic light' colour code
-  # 
+  #
   def show_date(d)
     if d == nil
       return ""
@@ -266,14 +269,6 @@ module TodosHelper
   end
     
   private
-  
-  def image_tag_for_delete
-    image_tag("blank.png", :title =>"Delete action", :class=>"delete_item")
-  end
-  
-  def image_tag_for_edit(todo)
-    image_tag("blank.png", :title =>"Edit action", :class=>"edit_item", :id=> dom_id(todo, 'edit_icon'))
-  end
   
   def image_tag_for_star(todo)
     class_str = todo.starred? ? "starred_todo" : "unstarred_todo"

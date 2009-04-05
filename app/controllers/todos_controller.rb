@@ -433,6 +433,7 @@ class TodosController < ApplicationController
     @source_view = params['_source_view'] || 'todo'
     numdays = params['days'].to_i
     @todo = Todo.find(params[:id])
+    @original_item_context_id = @todo.context_id
     @todo.show_from = (@todo.show_from || @todo.user.date) + numdays.days
     @saved = @todo.save
     
@@ -447,7 +448,10 @@ class TodosController < ApplicationController
   def calendar
     @source_view = params['_source_view'] || 'calendar'
     @page_title = "TRACKS::Calendar"
-    
+
+    @projects = current_user.projects.find(:all)
+    @default_project_context_name_map = build_default_project_context_name_map(@projects).to_json
+  
     due_today_date = Time.zone.now
     due_this_week_date = Time.zone.now.end_of_week
     due_next_week_date = due_this_week_date + 7.days
