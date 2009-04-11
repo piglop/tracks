@@ -57,9 +57,12 @@ module TodosHelper
   end
 
   def remote_defer_menu_item(days, todo)
+    url = {:controller => 'todos', :action => 'defer', :id => todo.id, :days => days,
+      :_source_view => (@source_view.underscore.gsub(/\s+/,'_') rescue "")}
+    url[:_tag_name] = @tag_name if @source_view == 'tag'
     return link_to_remote(
       image_tag("defer_#{days}_off.png", :mouseover => "defer_#{days}.png", :alt => "", :align => "absmiddle")+" Defer #{pluralize(days, "day")}",
-      :url => {:controller => 'todos', :action => 'defer', :id => todo.id, :days => days, :_source_view => (@source_view.underscore.gsub(/\s+/,'_') rescue "")},
+      :url => url,
       :before => todo_start_waiting_js(todo),
       :complete => todo_stop_waiting_js)
   end
@@ -158,11 +161,11 @@ module TodosHelper
   def staleness_class(item)
     if item.due || item.completed?
       return ""
-    elsif item.created_at < user_time - (prefs.staleness_starts * 3).days
+    elsif item.created_at < current_user.time - (prefs.staleness_starts * 3).days
       return " stale_l3"
-    elsif item.created_at < user_time - (prefs.staleness_starts * 2).days
+    elsif item.created_at < current_user.time - (prefs.staleness_starts * 2).days
       return " stale_l2"
-    elsif item.created_at < user_time - (prefs.staleness_starts).days
+    elsif item.created_at < current_user.time - (prefs.staleness_starts).days
       return " stale_l1"
     else
       return ""
@@ -239,7 +242,7 @@ module TodosHelper
   end
   
   def empty_container_msg_div_id
-    return "tickler-empty-nd" if source_view_is(:project) && @todo.deferred?
+    return "tickler-empty-nd" if source_view_is_one_of(:project, :tag) && @todo.deferred?
     return "p#{@todo.project_id}empty-nd" if source_view_is :project
     return "c#{@todo.context_id}empty-nd"
   end
@@ -276,7 +279,10 @@ module TodosHelper
   end  
   
   def defer_link(days)
-    link_to_remote image_tag("defer_#{days}.png", :alt => "Defer #{pluralize(days, 'day')}"), :url => {:controller => 'todos', :action => 'defer', :id => @todo.id, :days => days, :_source_view => (@source_view.underscore.gsub(/\s+/,'_') rescue "")}
+    url = {:controller => 'todos', :action => 'defer', :id => @todo.id, :days => days,
+      :_source_view => (@source_view.underscore.gsub(/\s+/,'_') rescue "")}
+    url[:_tag_name] = @tag_name if @source_view == 'tag'
+    link_to_remote image_tag("defer_#{days}.png", :alt => "Defer #{pluralize(days, 'day')}"), :url => url
   end
 
 end
