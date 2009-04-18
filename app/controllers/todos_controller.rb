@@ -49,6 +49,7 @@ class TodosController < ApplicationController
     @source_view = params['_source_view'] || 'todo'
     p = TodoCreateParamsHelper.new(params, prefs)        
     p.parse_dates() unless mobile?
+    tag_list = p.tag_list
     
     @todo = current_user.todos.build(p.attributes)
     
@@ -56,6 +57,11 @@ class TodosController < ApplicationController
       project = current_user.projects.find_or_create_by_name(p.project_name)
       @new_project_created = project.new_record_before_save?
       @todo.project_id = project.id
+      if tag_list.blank?
+        tag_list = project.default_tags unless project.default_tags.blank?
+      else
+        tag_list += ','+project.default_tags unless project.default_tags.blank?
+      end
     end
     
     if p.context_specified_by_name?
@@ -67,8 +73,8 @@ class TodosController < ApplicationController
 
     @todo.update_state_from_project
     @saved = @todo.save
-    unless (@saved == false) || p.tag_list.blank?
-      @todo.tag_with(p.tag_list)
+    unless (@saved == false) || tag_list.blank?
+      @todo.tag_with(tag_list)
       @todo.tags.reload
     end
     
@@ -132,6 +138,7 @@ class TodosController < ApplicationController
   def toggle_check
     @source_view = params['_source_view'] || 'todo'
     @original_item_due = @todo.due
+    @original_item_was_deferred = @todo.deferred?
     @saved = @todo.toggle_completion!
   
     # check if this todo has a related recurring_todo. If so, create next todo
@@ -143,6 +150,7 @@ class TodosController < ApplicationController
           determine_remaining_in_context_count(@todo.context_id)
           determine_down_count
           determine_completed_count if @todo.completed?
+          determine_deferred_tag_count(params['_tag_name']) if @source_view == 'tag'
           if source_view_is :calendar
             @original_item_due_id = get_due_id_for_calendar(@original_item_due)
             @old_due_empty = is_old_due_empty(@original_item_due_id)
