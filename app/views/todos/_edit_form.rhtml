@@ -24,9 +24,17 @@
       todoContextNameElement.value = defaultContextName;
     }
   }
+  function selectDefaultTags() {
+      todoTagListElement = $('<%= dom_id(@todo, 'tag_list') %>');
+      defaultTagList = $('tag_list').projectDefaultTagsMap[this.value];
+      if (defaultTagList && !todoTagListElement.editedByTracksUser) {
+          todoTagListElement.value = defaultTagList;
+      }
+  }
   Event.observe($('<%= dom_id(@todo, 'project_name') %>'), "focus", <%= dom_id(@todo, 'project_autocompleter') %>.activate.bind(<%= dom_id(@todo, 'project_autocompleter') %>));
   Event.observe($('<%= dom_id(@todo, 'project_name') %>'), "click", <%= dom_id(@todo, 'project_autocompleter') %>.activate.bind(<%= dom_id(@todo, 'project_autocompleter') %>));
   Event.observe($('<%= dom_id(@todo, 'project_name') %>'), "blur", selectDefaultContext.bind($('<%= dom_id(@todo, 'project_name') %>')));
+  Event.observe($('<%= dom_id(@todo, 'project_name') %>'), "blur", selectDefaultTags.bind($('<%= dom_id(@todo, 'project_name') %>')));
   </script>
 </div>
 
@@ -38,6 +46,7 @@
   <script type="text/javascript">
   <%= dom_id(@todo, 'context_autocompleter') %> = new Autocompleter.Local('<%= dom_id(@todo, 'context_name') %>', '<%= dom_id(@todo, 'context_list') %>', contextNames, {choices:100,autoSelect:false});
   Event.observe($('<%= dom_id(@todo, 'context_name') %>'), "focus", function(){ $('<%= dom_id(@todo, 'context_name') %>').editedByTracksUser = true; });
+  Event.observe($('<%= dom_id(@todo, 'tag_list') %>'), "focus", function(){ $('<%= dom_id(@todo, 'tag_list') %>').editedByTracksUser = true; });
   Event.observe($('<%= dom_id(@todo, 'context_name') %>'), "focus", <%= dom_id(@todo, 'context_autocompleter') %>.activate.bind(<%= dom_id(@todo, 'context_autocompleter') %>));
   Event.observe($('<%= dom_id(@todo, 'context_name') %>'), "click", <%= dom_id(@todo, 'context_autocompleter') %>.activate.bind(<%= dom_id(@todo, 'context_autocompleter') %>));
   </script>
@@ -45,6 +54,11 @@
 
 <label class="tag_list_label" for="<%= dom_id(@todo, 'tag_list') %>">Tags (separate with commas)</label>
 <%= text_field_tag 'tag_list', tag_list_text, :id => dom_id(@todo, 'tag_list'), :size => 30, :tabindex => 12 %> 
+<%= content_tag("div", "", :id => dom_id(@todo, 'tag_list')+"_auto_complete", :class => "auto_complete") %>
+<%= auto_complete_field dom_id(@todo, 'tag_list'), {
+  :url => {:controller => 'todos', :action => 'auto_complete_for_tag'},
+  :tokens => [',']
+} %>
 
 <div class="due_input">
   <label for="<%= dom_id(@todo, 'due_label') %>">Due</label>
