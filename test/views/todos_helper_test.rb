@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
 class TodosHelperTest < Test::Rails::HelperTestCase
-  fixtures :users
 
   def setup
     super
@@ -11,18 +10,6 @@ class TodosHelperTest < Test::Rails::HelperTestCase
   include ApplicationHelper
   include TodosHelper
   
-  def current_user
-    if @user.nil?
-      @user = users(:admin_user)
-      class << @user
-        def prefs
-          Preference.new
-        end
-      end
-    end
-    @user
-  end
-
   def format_date(date)
     if date
       date_format = "%d/%m/%Y"

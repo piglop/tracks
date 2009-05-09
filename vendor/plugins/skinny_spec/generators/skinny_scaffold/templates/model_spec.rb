@@ -12,7 +12,7 @@ describe <%= class_name %> do
   end
   
   after(:each) do
-    @<%= singular_name %>.destroy
+    @<%= singular_name %>.destroy unless @<%= singular_name %>.new_record?
   end
   
   # Add your model specs here, please!
