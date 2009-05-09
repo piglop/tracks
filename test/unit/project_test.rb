@@ -184,4 +184,15 @@ class ProjectTest < Test::Rails::TestCase
     assert_equal 'agenda', p.default_context.name    
   end
 
+  def test_default_context_name_method
+    p = Project.new
+    assert_equal '', p.default_context_name
+    p.default_context_name = contexts(:agenda).name
+    assert_equal contexts(:agenda), p.default_context
+    assert_equal contexts(:agenda).name, p.default_context_name
+    p.default_context_name = "an inexistant name"
+    assert_not_equal contexts(:agenda), p.default_context
+    assert_equal "an inexistant name", p.default_context_name
+  end
+
 end

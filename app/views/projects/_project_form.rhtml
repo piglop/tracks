@@ -5,24 +5,24 @@ project = project_form
 
   <%= source_view_tag( @source_view ) -%>
 
-  <label for="project_name">Name:</label><br/>
-  <%= text_field :project, 'name', :class => 'project-name'  %><br/>
+  <%= label 'project[]', 'name', 'Name:' %><br/>
+  <%= text_field 'project[]', 'name', :class => 'project-name'  %><br/>
 
-  <label for="project_description">Description (optional):</label><br/>
-  <%= text_area :project, 'description', "cols" => 30, "rows" => 4, :class => 'project-description'  %><br/>
+  <%= label 'project[]', "description", "Description (optional):" %><br/>
+  <%= text_area 'project[]', 'description', "cols" => 30, "rows" => 4, :class => 'project-description'  %><br/>
 
-  <label for="project_done">Project status:</label><br/>
+  <%= label 'project[]', "done", "Project status:" %><br/>
   <% ['active', 'hidden', 'completed'].each do | state | %>
-    <%= radio_button(:project, 'state', state) %> <%= state.titlecase %>
+    <%= radio_button('project[]', 'state', state) %> <%= label 'project[]', "state_#{state}", state.titlecase %>
   <% end %><br/>
 
-  <label for="project[default_context_name]">Default Context</label><br/>
-  <%= text_field_tag("project[default_context_name]", project.default_context.name, {:tabindex=>1,:size=> 25}) %>
+  <%= label 'project[]', "default_context_name", "Default Context" %><br/>
+  <%= text_field('project[]', "default_context_name", {:tabindex=>1,:size=> 25}) %>
   <%= render :partial => 'default_context_autocomplete' %>
   <br/>
 
-  <label for="project[default_tags]">Default Tags</label><br/>
-  <%= text_field_tag("project[default_tags]", project.default_tags, {:tabindex=>2,:size=> 25}) %>
+  <%= label 'project[]', "default_tags", "Default Tags" %><br/>
+  <%= text_field('project[]', "default_tags", {:tabindex=>2,:size=> 25}) %>
   <br/>
 
   <input type="hidden" name="wants_render" value="true" />

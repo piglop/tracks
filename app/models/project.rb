@@ -98,6 +98,14 @@ class Project < ActiveRecord::Base
     original_default_context.nil? ? Context.null_object : original_default_context
   end
   
+  def default_context_name
+    default_context.name
+  end
+  
+  def default_context_name=(name)
+    self.default_context = Context.find_or_create_by_name(name)
+  end
+  
   # would prefer to call this method state=(), but that causes an endless loop
   # as a result of acts_as_state_machine calling state=() to update the attribute
   def transition_to(candidate_state)
