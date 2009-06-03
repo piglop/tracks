@@ -26,7 +26,7 @@ class ApplicationController < ActionController::Base
   include LoginSystem
   helper_method :current_user, :prefs
 
-  layout proc{ |controller| controller.mobile? ? "mobile" : "standard" }
+  layout proc { |controller| controller.layout }
   
   before_filter :set_session_expiration
   before_filter :set_time_zone
@@ -39,6 +39,15 @@ class ApplicationController < ActionController::Base
   include ActionView::Helpers::SanitizeHelper
   extend ActionView::Helpers::SanitizeHelper::ClassMethods
   helper_method :format_date, :markdown
+
+  def layout
+    if mobile?
+      "mobile"
+    else
+      params["layout"] or "standard"
+    end
+  end
+  
 
   # By default, sets the charset to UTF-8 if it isn't already set
   def set_charset
