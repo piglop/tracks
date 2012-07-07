@@ -413,7 +413,7 @@ fr:
     no_recurring_todos: "Il n'y a pas de tâches récurrentes actuellement"
     error_completing_todo: "Il s'est produit une erreur lors de l'execution de l'action récurrente %{description}"
     recurring_pattern_removed: "La périodicité est retiré de %{count}"
-    convert_to_project: Faire projet
+    convert_to_project: Tranformer en projet
     no_deferred_pending_actions: "Il n'y pas d'actions reportées ou en attente actuellement"
     delete_recurring_action_confirm: "Etes-vous sûr de vouloir supprimer l'action récurrente '%{description'}?"
     completed_last_day: "Complété ces dernières 24 heures"
